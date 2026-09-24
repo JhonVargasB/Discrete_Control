@@ -87,15 +87,15 @@ s_2 = \pm\sqrt{1-c_2^2}
 
 and therefore
 ```math
-\theta_2 = \operatorname{atan2}(s_2,c_2).
+\theta_2 = \mathrm{atan2}(s_2,c_2).
 ```
 
 The first joint angle is then
 ```math
 \theta_1 =
-\operatorname{atan2}(p_y,p_x)
+\mathrm{atan2}(p_y,p_x)
 -
-\operatorname{atan2}
+\mathrm{atan2}
 \left(
 a_2\sin\theta_2,
 a_1+a_2\cos\theta_2
