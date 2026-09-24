@@ -47,32 +47,23 @@ The arm dimensions used in the project are:
 - Link 2: **$a_2 = 10.1\,\mathrm{cm}$**
 
 The encoder resolution used by the firmware is approximately **8341 counts per output-shaft revolution**, giving an angular resolution of:
-
-
-$$
+```math
 \Delta\theta = \frac{2\pi}{8341}
 \approx 7.53\times10^{-4}\;\text{rad}
 \approx 0.0432^\circ.
-
-$$
+```
 
 ---
 
 # Robot kinematics
 
 For a planar 2R manipulator, the Cartesian position of the end effector is
-
-
-$$
+```math
 p_x = a_1\cos(\theta_1)+a_2\cos(\theta_1+\theta_2)
-
-$$
-
-
-$$
+```
+```math
 p_y = a_1\sin(\theta_1)+a_2\sin(\theta_1+\theta_2)
-
-$$
+```
 
 where:
 
@@ -83,35 +74,24 @@ where:
 ## Inverse kinematics
 
 Given a requested point $(p_x,p_y)$, the second joint angle can be obtained from
-
-
-$$
+```math
 c_2 =
 \frac{p_x^2+p_y^2-a_1^2-a_2^2}
 {2a_1a_2}
-
-$$
+```
 
 with
-
-
-$$
+```math
 s_2 = \pm\sqrt{1-c_2^2}
-
-$$
+```
 
 and therefore
-
-
-$$
+```math
 \theta_2 = \operatorname{atan2}(s_2,c_2).
-
-$$
+```
 
 The first joint angle is then
-
-
-$$
+```math
 \theta_1 =
 \operatorname{atan2}(p_y,p_x)
 -
@@ -120,8 +100,7 @@ $$
 a_2\sin\theta_2,
 a_1+a_2\cos\theta_2
 \right).
-
-$$
+```
 
 The two possible signs of $s_2$ correspond to the two classical **elbow-up / elbow-down** configurations. The firmware checks the resulting solution against the allowed joint limits before commanding the motors.
 
@@ -132,69 +111,46 @@ The two possible signs of $s_2$ correspond to the two classical **elbow-up / elb
 Each joint is driven by a DC motor with encoder feedback.
 
 The identified discrete velocity model used in the project is
-
-
-$$
+```math
 \omega[k+1] = a\,\omega[k] + b\,u[k]
-
-$$
+```
 
 with
-
-
-$$
+```math
 a = 0.7068,
 \qquad
 b = 3.0825.
-
-$$
+```
 
 The angular position evolves according to
-
-
-$$
+```math
 \theta[k+1] = \theta[k] + T_s\omega[k]
-
-$$
+```
 
 with sampling period
-
-
-$$
+```math
 T_s = 20\;\text{ms}.
-
-$$
+```
 
 Defining the state vector
-
-
-$$
+```math
 x[k] =
 \begin{bmatrix}
 \theta[k]\\
 \omega[k]
 \end{bmatrix},
-
-$$
+```
 
 the plant can be written as
-
-
-$$
+```math
 x[k+1] = Gx[k] + Hu[k]
-
-$$
-
-
-$$
+```
+```math
 y[k]=Cx[k]
-
-$$
+```
 
 where
-
-
-$$
+```math
 G =
 \begin{bmatrix}
 1 & T_s\\
@@ -211,8 +167,7 @@ C =
 \begin{bmatrix}
 1 & 0
 \end{bmatrix}.
-
-$$
+```
 
 Here:
 
@@ -228,38 +183,27 @@ Here:
 The objective is to make the measured joint angle follow a desired reference $r[k]$ while eliminating steady-state position error.
 
 The tracking error is
-
-
-$$
+```math
 e[k] = r[k]-y[k].
-
-$$
+```
 
 To introduce integral action, an additional state is accumulated:
-
-
-$$
+```math
 v[k+1] = v[k] + e[k+1].
-
-$$
+```
 
 The augmented state is therefore
-
-
-$$
+```math
 \xi[k] =
 \begin{bmatrix}
 \theta[k]\\
 \omega[k]\\
 v[k]
 \end{bmatrix}.
-
-$$
+```
 
 The augmented discrete model used for the LQI design is
-
-
-$$
+```math
 \xi[k+1]
 =
 \begin{bmatrix}
@@ -280,64 +224,48 @@ u[k]
 1
 \end{bmatrix}
 r[k+1].
-
-$$
+```
 
 The implemented feedback law is
-
-
-$$
+```math
 u[k]
 =
 -K_{\theta}\theta[k]
 -K_{\omega}\omega[k]
 +K_i v[k].
-
-$$
+```
 
 The controller gains currently documented in the project are
-
-
-$$
+```math
 K_{\theta}=8.5621,
 \qquad
 K_{\omega}=0.3637,
 \qquad
 K_i=1.9635.
-
-$$
+```
 
 The same controller structure is applied independently to both SCARA joints.
 
 ## What each term does
 
 ### Position feedback
-
-
-$$
+```math
 -K_{\theta}\theta[k]
-
-$$
+```
 
 penalizes deviation of the angular position from the desired operating point.
 
 ### Velocity feedback
-
-
-$$
+```math
 -K_{\omega}\omega[k]
-
-$$
+```
 
 adds damping and helps reduce oscillatory behavior.
 
 ### Integral action
-
-
-$$
+```math
 +K_i v[k]
-
-$$
+```
 
 accumulates tracking error and allows the controller to remove residual steady-state error caused by friction, model mismatch or external disturbances.
 
@@ -352,19 +280,15 @@ The theoretical LQI law is complemented in firmware with practical constraints:
 - encoder-based position feedback.
 
 The normalized control signal is approximately limited to
-
-
-$$
+```math
 u \in [-0.15,\;0.15]
-
-$$
+```
 
 before being translated into the PWM and motor-direction commands sent to the TB6612.
 
 ---
 
 # Control architecture
-
 ```text
 MATLAB
    │
@@ -395,7 +319,6 @@ DC Motors + Encoders
 ---
 
 ## Repository structure
-
 ```text
 Discrete_Control/
 ├── main/        # ESP-IDF firmware and control experiments
